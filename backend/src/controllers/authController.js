@@ -97,3 +97,16 @@ export const getMe = async (req, res) => {
     user: req.user,
   });
 };
+
+
+export const logoutUser = (req,res) =>{
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: false,
+        sameSite:"lax",
+    });
+
+    res.json({
+        message:"Logout successful",
+    });
+}
