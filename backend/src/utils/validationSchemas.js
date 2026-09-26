@@ -26,3 +26,40 @@ export const loginSchema = z.object({
         .string()
         .min(1,"Password is reqired"),
 });
+
+
+export const createMonitorSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Monitor name must be at least 2 characters long"),
+
+  url: z
+    .string()
+    .trim()
+    .url("Please enter a valid URL"),
+
+  method: z
+    .enum(["GET"])
+    .default("GET"),
+
+  expectedStatus: z
+    .number()
+    .int()
+    .min(100)
+    .max(599)
+    .default(200),
+
+  interval: z
+    .number()
+    .int()
+    .min(1)
+    .default(5),
+
+  timeout: z
+    .number()
+    .int()
+    .min(1)
+    .default(10),
+
+});
