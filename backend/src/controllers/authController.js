@@ -90,3 +90,10 @@ export const loginUser = async (req, res) => {
         });
     }
 }
+
+
+export const getMe = async (req, res) => {
+  res.json({
+    user: req.user,
+  });
+};
