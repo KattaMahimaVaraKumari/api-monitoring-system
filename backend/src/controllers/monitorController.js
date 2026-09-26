@@ -27,7 +27,7 @@ export const getMonitors = async (req,res) =>{
         res.json({
             monitors,
         });
-        
+
     } catch (error) {
         res.status(500).json({
             message: "Server error",
@@ -35,3 +35,94 @@ export const getMonitors = async (req,res) =>{
         });
     }
 }
+
+
+export const getMonitor = async (req, res) => {
+    try {
+        const monitor = await Monitor.findOne({
+            _id: req.params.id,
+            userId: req.user._id,
+        });
+
+        if (!monitor) {
+            return res.status(404).json({
+                message: "Monitor not found",
+            });
+        }
+
+        res.json({
+            monitor,
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error",
+            error: error.message,
+        });
+    }
+}
+
+
+export const updateMonitor = async (req, res) => {
+    try {
+        const monitor = await Monitor.findOne({
+            _id: req.params.id,
+            userId: req.user._id,
+        });
+
+        if (!monitor) {
+            return res.status(404).json({
+                message: "Monitor not found",
+            });
+        }
+
+        const { name, url, method, expectedStatus, interval, timeout, active, } = req.body;
+
+        monitor.name = name ?? monitor.name;
+        monitor.url = url ?? monitor.url;
+        monitor.method = method ?? monitor.method;
+        monitor.expectedStatus = expectedStatus ?? monitor.expectedStatus;
+        monitor.interval = interval ?? monitor.interval;
+        monitor.timeout = timeout ?? monitor.timeout;
+        monitor.active = active ?? monitor.active;
+
+        await monitor.save();
+
+        res.json({
+            message: "Monitor updated successfully",
+            monitor,
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error",
+            error: error.message,
+        })
+    }
+}
+
+
+export const deleteMonitor = async(req,res) =>{
+    try{
+        const monitor = await Monitor.findOneAndDelete({
+            _id: req.params.id,
+            userId: req.user._id,
+        });
+
+        if(!monitor){
+            return res.status(404).json({
+                message: "Monitor not found",
+            });
+        }
+
+        res.json({
+            message: "Monitor deleted successfully",
+        });
+
+    } catch (error){
+        res.status(500).json({
+            message: "Server error",
+            error: error.message,
+        });
+    }
+};
