@@ -16,3 +16,22 @@ export const createMonitor = async (req, res)=>{
         });
     }
 }
+
+
+export const getMonitors = async (req,res) =>{
+    try{
+        const monitors = await Monitor.find({
+            userId: req.user._id,
+        }).sort({ createdAt: -1});
+
+        res.json({
+            monitors,
+        });
+        
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error",
+            error: error.message,
+        });
+    }
+}
