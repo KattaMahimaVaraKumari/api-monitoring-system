@@ -1,4 +1,5 @@
 import Monitor from "../models/Monitor.js";
+import checkMonitor from "../services/monitoringService.js";
 
 export const createMonitor = async (req, res)=>{
     try{
@@ -120,6 +121,34 @@ export const deleteMonitor = async(req,res) =>{
         });
 
     } catch (error){
+        res.status(500).json({
+            message: "Server error",
+            error: error.message,
+        });
+    }
+};
+
+
+export const testMonitor = async (req, res) => {
+    try {
+        const monitor = await Monitor.findOne({
+            _id: req.params.id,
+            userId: req.user._id,
+        });
+
+        if (!monitor) {
+            return res.status(404).json({
+                message: "Monitor not found",
+            });
+        }
+
+        const result = await checkMonitor(monitor);
+
+        res.json({
+            monitor: monitor.name,
+            result,
+        });
+    } catch (error) {
         res.status(500).json({
             message: "Server error",
             error: error.message,
