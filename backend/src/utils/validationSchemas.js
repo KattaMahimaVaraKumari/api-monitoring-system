@@ -63,3 +63,45 @@ export const createMonitorSchema = z.object({
     .default(10),
 
 });
+
+
+export const updateMonitorSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Monitor name must be at least 2 characters long")
+    .optional(),
+
+  url: z
+    .string()
+    .trim()
+    .url("Please enter a valid URL")
+    .optional(),
+
+  method: z
+    .enum(["GET"])
+    .optional(),
+
+  expectedStatus: z
+    .number()
+    .int()
+    .min(100)
+    .max(599)
+    .optional(),
+
+  interval: z
+    .number()
+    .int()
+    .min(1)
+    .optional(),
+
+  timeout: z
+    .number()
+    .int()
+    .min(1)
+    .optional(),
+
+  active: z
+    .boolean()
+    .optional(),
+});
