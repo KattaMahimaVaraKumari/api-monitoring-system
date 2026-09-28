@@ -1,3 +1,5 @@
+import ApiEvent from "../models/ApiEvent.js"
+
 const checkMonitor = async (monitor) => {
     const startTime = Date.now();
 
@@ -19,16 +21,26 @@ const checkMonitor = async (monitor) => {
 
         const success = response.status === monitor.expectedStatus;
 
-        return {
+        const result = {
             success,
             statusCode: response.status,
             responseTime,
-            errorMessage: success ? null : `Unexpected status code: ${response.status}`,
+            errorMessage: success
+                ? null
+                : `Unexpected status code: ${response.status}`,
         };
+
+        await ApiEvent.create({
+            monitorId: monitor._id,
+            ...result,
+        });
+
+        return result;
+
     } catch (error) {
         const responseTime = Date.now() - startTime;
 
-        return {
+        const result = {
             success: false,
             statusCode: null,
             responseTime,
@@ -36,7 +48,14 @@ const checkMonitor = async (monitor) => {
                 error.name === "AbortError"
                     ? "Request timed out"
                     : error.message,
-        }
+        };
+
+        await ApiEvent.create({
+            monitorId: monitor._id,
+            ...result,
+        });
+
+        return result;
     }
 }
 
