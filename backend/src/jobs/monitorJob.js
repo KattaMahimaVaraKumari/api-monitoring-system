@@ -11,9 +11,22 @@ const startMonitorJob = () => {
                 active: true,
             });
 
+            const now = Date.now();
+
             for(const monitor of monitors){
-                await checkMonitor(monitor);
-                console.log(`Checked: ${monitor.name}`);
+                const intervalMs = monitor.interval * 60 * 1000;
+
+                const lastChecked = monitor.lastCheckedAt
+                    ? monitor.lastCheckedAt.getTime()
+                    : 0;
+
+                const timeSinceLastCheck = now - lastChecked;
+
+                if(timeSinceLastCheck >= intervalMs){
+                    await checkMonitor(monitor);
+
+                    console.log(`Checked: ${monitor.name}`);
+                }
             }
 
         } catch(error){

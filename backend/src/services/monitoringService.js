@@ -2,6 +2,10 @@ import ApiEvent from "../models/ApiEvent.js"
 import Monitor from "../models/Monitor.js"
 
 const checkMonitor = async (monitor) => {
+    await Monitor.findByIdAndUpdate(monitor._id,{
+        lastCheckedAt: new Date(),
+    });
+    
     const startTime = Date.now();
 
     try {

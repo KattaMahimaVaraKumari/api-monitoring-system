@@ -40,6 +40,11 @@ const monitorSchema = new mongoose.Schema({
         default: 10,
     },
 
+    lastCheckedAt:{
+        type: Date,
+        default: null,
+    },
+
     status: {
         type: String,
         enum: ["healthy", "down", "unknown"],
