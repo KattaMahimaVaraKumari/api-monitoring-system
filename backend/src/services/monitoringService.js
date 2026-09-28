@@ -1,4 +1,5 @@
 import ApiEvent from "../models/ApiEvent.js"
+import Monitor from "../models/Monitor.js"
 
 const checkMonitor = async (monitor) => {
     const startTime = Date.now();
@@ -35,6 +36,10 @@ const checkMonitor = async (monitor) => {
             ...result,
         });
 
+        await Monitor.findByIdAndUpdate(monitor._id, {
+            status: success ? "healthy" : "down",
+        });
+
         return result;
 
     } catch (error) {
@@ -54,6 +59,10 @@ const checkMonitor = async (monitor) => {
             monitorId: monitor._id,
             ...result,
         });
+
+        await Monitor.findByIdAndUpdate(monitor._id, {
+            status: "down",
+        })
 
         return result;
     }
