@@ -7,12 +7,14 @@ import cookieParser from "cookie-parser";
 import connectDB from "./src/config/db.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import monitorRoutes from "./src/routes/monitorRoutes.js";
+import startMonitorJob from "./src/jobs/monitorJob.js";
 
 dotenv.config();
 
 const app = express();
 
 connectDB();
+startMonitorJob();
 
 app.use(helmet());
 app.use(cors());
