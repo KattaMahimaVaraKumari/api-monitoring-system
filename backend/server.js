@@ -9,6 +9,7 @@ import authRoutes from "./src/routes/authRoutes.js";
 import monitorRoutes from "./src/routes/monitorRoutes.js";
 import startMonitorJob from "./src/jobs/monitorJob.js";
 import incidentRoutes from "./src/routes/incidentRoutes.js"
+import analyticsRoutes from "./src/routes/analyticsRoutes.js"
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ const PORT = process.env.PORT || 5000;
 app.use("/api/auth",authRoutes);
 app.use("/api/monitors",monitorRoutes);
 app.use("/api/incidents", incidentRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
