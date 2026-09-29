@@ -1,5 +1,6 @@
 import ApiEvent from "../models/ApiEvent.js"
 import Monitor from "../models/Monitor.js"
+import { createIncidentIfNeeded, resolveIncident } from "./incidentService.js";
 
 const checkMonitor = async (monitor) => {
     await Monitor.findByIdAndUpdate(monitor._id,{
@@ -40,6 +41,12 @@ const checkMonitor = async (monitor) => {
             ...result,
         });
 
+        if (success) {
+            await resolveIncident(monitor._id);
+        } else {
+            await createIncidentIfNeeded(monitor._id, result.errorMessage);
+        }
+
         await Monitor.findByIdAndUpdate(monitor._id, {
             status: success ? "healthy" : "down",
         });
@@ -63,6 +70,8 @@ const checkMonitor = async (monitor) => {
             monitorId: monitor._id,
             ...result,
         });
+
+        await createIncidentIfNeeded(monitor._id, result.errorMessage);
 
         await Monitor.findByIdAndUpdate(monitor._id, {
             status: "down",
