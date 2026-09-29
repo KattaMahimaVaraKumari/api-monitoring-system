@@ -1,5 +1,5 @@
 import Monitor from "../models/Monitor.js";
-import getMonitorMetrics from "../services/analyticsService.js";
+import getMonitorMetrics,{getDashboardMetrics} from "../services/analyticsService.js";
 
 export const getMonitorAnalytics = async (req,res) =>{
     try{
@@ -32,3 +32,26 @@ export const getMonitorAnalytics = async (req,res) =>{
         });
     }
 };
+
+
+export const getDashboardAnalytics = async (req, res) => {
+    try {
+        const monitors = await Monitor.find({ userId: req.user._id, });
+
+        const monitorIds = monitors.map((monitor) => monitor._id);
+
+        const metrics = await getDashboardMetrics(monitorIds);
+
+        const totalApis = monitors.length;
+
+        res.json({
+            totalApis,
+            ...metrics,
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error",
+            error: error.message,
+        });
+    }
+}
