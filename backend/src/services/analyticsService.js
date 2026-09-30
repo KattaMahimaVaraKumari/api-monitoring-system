@@ -89,4 +89,21 @@ export const getDashboardMetrics = async (monitorIds) => {
     };
 }
 
+
+export const getMonitorTimeSeries = async(monitorId,hours=24)=>{
+    const startTime = new Date(Date.now() - hours * 60 * 60 * 1000);
+
+    const events = await ApiEvent.find({
+        monitorId,
+        timestamp: {
+            $gte:startTime,
+        },
+    })
+      .sort({timestamp:1})
+      .select("timestamp responseTime success statusCode");
+    
+    return events;
+};
+
+
 export default getMonitorMetrics;
