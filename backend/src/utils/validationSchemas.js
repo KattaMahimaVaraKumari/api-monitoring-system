@@ -37,7 +37,19 @@ export const createMonitorSchema = z.object({
   url: z
     .string()
     .trim()
-    .url("Please enter a valid URL"),
+    .url("Please enter a valid URL")
+    .refine(
+      (value) => {
+        try {
+          const protocol = new URL(value).protocol;
+
+          return protocol === "http:" || protocol === "https:";
+        } catch {
+          return false;
+        }
+      },
+      "URL must use HTTP or HTTPS"
+    ),
 
   method: z
     .enum(["GET"])
@@ -105,3 +117,12 @@ export const updateMonitorSchema = z.object({
     .boolean()
     .optional(),
 });
+
+
+export const createApiKeySchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2,"API key name must be at least 2 characters long"),
+});
+

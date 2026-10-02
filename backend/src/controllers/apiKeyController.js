@@ -4,10 +4,6 @@ export const createApiKeyController = async(req,res)=>{
     try{
         const {name} = req.body;
 
-        if(!name || name.trim().length<2){
-            return res.status(400).json({message: "API key name must be at least 2 characters long,"});
-        }
-
         const result = await createApiKey(
             req.user._id,
             name.trim()

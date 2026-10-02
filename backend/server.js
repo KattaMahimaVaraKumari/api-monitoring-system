@@ -11,6 +11,7 @@ import startMonitorJob from "./src/jobs/monitorJob.js";
 import incidentRoutes from "./src/routes/incidentRoutes.js"
 import analyticsRoutes from "./src/routes/analyticsRoutes.js"
 import apiKeyRoutes from "./src/routes/apiKeyRoutes.js";
+import {notFound, errorHandler,} from "./src/middleware/errorMiddleware.js"
 
 dotenv.config();
 
@@ -37,6 +38,8 @@ app.use("/api/monitors",monitorRoutes);
 app.use("/api/incidents", incidentRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/keys",apiKeyRoutes);
+app.use(notFound);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
