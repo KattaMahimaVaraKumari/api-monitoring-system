@@ -11,6 +11,8 @@ import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
+import Monitors from "./pages/Monitors";
+
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
@@ -56,6 +58,7 @@ const AppRoutes = () => {
         }
       >
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/monitors" element={<Monitors />} />
       </Route>
 
       <Route
