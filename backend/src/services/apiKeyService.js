@@ -19,6 +19,7 @@ export const createApiKey = async (userId, name) => {
 export const getUserApiKeys = async (userId) => {
     return await ApiKey.find({
         userId,
+        revoked: false,
     }).select("-keyHash");
 };
 
