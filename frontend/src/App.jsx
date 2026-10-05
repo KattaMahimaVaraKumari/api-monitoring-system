@@ -13,6 +13,7 @@ import Register from "./pages/Register";
 
 import Monitors from "./pages/Monitors";
 import MonitorDetails from "./pages/MonitorDetails";
+import Incidents from "./pages/Incidents";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -61,6 +62,7 @@ const AppRoutes = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/monitors" element={<Monitors />} />
         <Route path="/monitors/:id" element={<MonitorDetails />} />
+        <Route path="/incidents" element={<Incidents />} />
       </Route>
 
       <Route
