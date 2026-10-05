@@ -31,8 +31,8 @@ const MonitorDetails = () => {
           api.get(`/analytics/monitors/${id}/timeseries`),
         ]);
 
-        setAnalytics(analyticsResponse.data);
-        setTimeSeries(timeSeriesResponse.data.timeSeries || []);
+        setAnalytics(analyticsResponse.data.metrics);
+        setTimeSeries(timeSeriesResponse.data.events || []);
       } catch (error) {
         setError(
           error.response?.data?.message ||
