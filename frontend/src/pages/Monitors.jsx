@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Activity, Plus, Pencil, Trash2, X, RefreshCw } from "lucide-react";
+import { Link } from "react-router-dom";
 import api from "../services/api";
 
 const initialForm = {
@@ -367,9 +368,12 @@ const Monitors = () => {
                 {monitors.map((monitor) => (
                   <tr key={monitor._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
-                      <p className="font-medium text-gray-900">
+                      <Link
+                        to={`/monitors/${monitor._id}`}
+                        className="font-medium text-gray-900 hover:text-blue-600"
+                      >
                         {monitor.name}
-                      </p>
+                      </Link>
                       <p className="mt-1 max-w-xs truncate text-sm text-gray-500">
                         {monitor.url}
                       </p>
