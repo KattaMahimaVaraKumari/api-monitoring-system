@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [incidents, setIncidents] = useState([]);
+  const [monitors, setMonitors] = useState([]);
 
   useEffect(() => {
     const fetchDashboardMetrics = async () => {
@@ -25,6 +26,10 @@ const Dashboard = () => {
         const incidentsResponse = await api.get("/incidents");
 
         setIncidents(incidentsResponse.data.incidents || []);
+
+        const monitorsResponse = await api.get("/monitors");
+
+        setMonitors(monitorsResponse.data.monitors || []);
       } catch (error) {
         setError(
           error.response?.data?.message ||
@@ -234,6 +239,79 @@ const Dashboard = () => {
                             ).toLocaleString()
                           : "-"}
                       </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="mt-8 rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div className="border-b border-gray-200 px-6 py-5">
+              <h2 className="font-semibold text-gray-900">
+                Monitor Status
+              </h2>
+
+              <p className="mt-1 text-sm text-gray-500">
+                Current health of your monitored APIs.
+              </p>
+            </div>
+
+            {monitors.length === 0 ? (
+              <div className="px-6 py-12 text-center">
+                <p className="font-medium text-gray-900">
+                  No monitors yet
+                </p>
+
+                <p className="mt-1 text-sm text-gray-500">
+                  Add an API monitor to start tracking its health.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {monitors.map((monitor) => (
+                  <div
+                    key={monitor._id}
+                    className="flex items-center justify-between gap-4 px-6 py-5"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-gray-900">
+                        {monitor.name}
+                      </p>
+
+                      <p className="mt-1 truncate text-sm text-gray-500">
+                        {monitor.url}
+                      </p>
+
+                      <p className="mt-1 text-xs text-gray-400">
+                        Last checked:{" "}
+                        {monitor.lastCheckedAt
+                          ? new Date(
+                              monitor.lastCheckedAt
+                            ).toLocaleString()
+                          : "Not checked yet"}
+                      </p>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-4">
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${
+                          monitor.status === "healthy"
+                            ? "bg-green-50 text-green-700"
+                            : monitor.status === "down"
+                            ? "bg-red-50 text-red-700"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {monitor.status || "unknown"}
+                      </span>
+
+                      <a
+                        href={`/monitors/${monitor._id}`}
+                        className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                      >
+                        View
+                      </a>
                     </div>
                   </div>
                 ))}
