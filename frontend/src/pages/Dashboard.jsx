@@ -295,14 +295,22 @@ const Dashboard = () => {
 
                     <div className="flex shrink-0 items-center gap-4">
                       <span
-                        className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${
-                          monitor.status === "healthy"
+                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium capitalize ${monitor.status === "healthy"
                             ? "bg-green-50 text-green-700"
                             : monitor.status === "down"
-                            ? "bg-red-50 text-red-700"
-                            : "bg-gray-100 text-gray-600"
-                        }`}
+                              ? "bg-red-50 text-red-700"
+                              : "bg-gray-100 text-gray-600"
+                          }`}
                       >
+                        <span
+                          className={`h-2 w-2 rounded-full ${monitor.status === "healthy"
+                              ? "bg-green-500"
+                              : monitor.status === "down"
+                                ? "bg-red-500"
+                                : "bg-gray-400"
+                            }`}
+                        />
+
                         {monitor.status || "unknown"}
                       </span>
 
