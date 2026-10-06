@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 
-import { Activity, CheckCircle2, Clock3, AlertTriangle,} from "lucide-react";
+import {
+  Activity,
+  CheckCircle2,
+  Clock3,
+  AlertTriangle,
+} from "lucide-react";
 
 import api from "../services/api";
 
@@ -8,6 +13,7 @@ const Dashboard = () => {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [incidents, setIncidents] = useState([]);
 
   useEffect(() => {
     const fetchDashboardMetrics = async () => {
@@ -15,6 +21,10 @@ const Dashboard = () => {
         const response = await api.get("/analytics/dashboard");
 
         setMetrics(response.data);
+
+        const incidentsResponse = await api.get("/incidents");
+
+        setIncidents(incidentsResponse.data.incidents || []);
       } catch (error) {
         setError(
           error.response?.data?.message ||
@@ -149,6 +159,86 @@ const Dashboard = () => {
                 </p>
               </div>
             </div>
+          </div>
+
+          <div className="mt-8 rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div className="border-b border-gray-200 px-6 py-5">
+              <h2 className="font-semibold text-gray-900">
+                Recent Incidents
+              </h2>
+
+              <p className="mt-1 text-sm text-gray-500">
+                Latest API outages and their current status.
+              </p>
+            </div>
+
+            {incidents.length === 0 ? (
+              <div className="flex flex-col items-center px-6 py-12 text-center">
+                <div className="mb-4 rounded-full bg-green-50 p-4">
+                  <CheckCircle2
+                    size={28}
+                    className="text-green-600"
+                  />
+                </div>
+
+                <h3 className="font-semibold text-gray-900">
+                  No recent incidents
+                </h3>
+
+                <p className="mt-2 text-sm text-gray-500">
+                  All monitored APIs are currently running without recorded incidents.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {incidents.slice(0, 5).map((incident) => (
+                  <div
+                    key={incident._id}
+                    className="flex items-center justify-between gap-4 px-6 py-5"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="rounded-lg bg-red-50 p-2">
+                        <AlertTriangle
+                          size={18}
+                          className="text-red-600"
+                        />
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-gray-900">
+                          {incident.monitorId?.name || "Unknown Monitor"}
+                        </p>
+
+                        <p className="mt-1 text-sm text-gray-500">
+                          {incident.errorMessage ||
+                            "API incident detected"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 text-right">
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${
+                          incident.status === "open"
+                            ? "bg-red-50 text-red-700"
+                            : "bg-green-50 text-green-700"
+                        }`}
+                      >
+                        {incident.status}
+                      </span>
+
+                      <p className="mt-2 text-xs text-gray-500">
+                        {incident.startedAt
+                          ? new Date(
+                              incident.startedAt
+                            ).toLocaleString()
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </>
       )}
