@@ -24,21 +24,17 @@ const Monitors = () => {
 
   const fetchMonitors = async () => {
     try {
-      setError("");
+      setLoading(true);
+
       const response = await api.get("/monitors");
-      setMonitors(response.data.monitors);
+
+      setMonitors(response.data.monitors || []);
     } catch (error) {
-      setError(
-        error.response?.data?.message || "Unable to load monitors."
-      );
+      console.error("Failed to fetch monitors:", error);
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchMonitors();
-  }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -138,6 +134,10 @@ const Monitors = () => {
     down: "bg-red-50 text-red-700",
     unknown: "bg-gray-100 text-gray-600",
   };
+
+  useEffect(() => {
+    fetchMonitors();
+  }, []);
 
   return (
     <div>
@@ -326,8 +326,12 @@ const Monitors = () => {
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-sm text-gray-500">
-            Loading monitors...
+          <div className="rounded-xl border border-gray-200 bg-white p-12 text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
+
+            <p className="mt-4 text-sm text-gray-500">
+              Loading monitors...
+            </p>
           </div>
         ) : monitors.length === 0 ? (
           <div className="flex flex-col items-center px-6 py-14 text-center">
