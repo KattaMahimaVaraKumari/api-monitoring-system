@@ -15,6 +15,7 @@ const initialForm = {
 const Monitors = () => {
   const [monitors, setMonitors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -22,9 +23,16 @@ const Monitors = () => {
   const [form, setForm] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchMonitors = async () => {
+  const fetchMonitors = async (showRefreshLoader = false) => {
     try {
-      setLoading(true);
+      if (showRefreshLoader) {
+        setRefreshing(true);
+      }
+
+      if (!showRefreshLoader) {
+        setLoading(true);
+      }
+
       setError("");
 
       const response = await api.get("/monitors");
@@ -39,6 +47,10 @@ const Monitors = () => {
       );
     } finally {
       setLoading(false);
+
+      if (showRefreshLoader) {
+        setRefreshing(false);
+      }
     }
   };
 
@@ -157,11 +169,15 @@ const Monitors = () => {
 
         <div className="flex gap-3">
           <button
-            onClick={fetchMonitors}
-            className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            onClick={() => fetchMonitors(true)}
+            disabled={refreshing}
+            className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <RefreshCw size={16} />
-            Refresh
+            <RefreshCw
+              size={16}
+              className={refreshing ? "animate-spin" : ""}
+            />
+            {refreshing ? "Refreshing..." : "Refresh"}
           </button>
 
           <button
