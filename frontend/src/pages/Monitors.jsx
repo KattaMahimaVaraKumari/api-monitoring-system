@@ -111,25 +111,25 @@ const Monitors = () => {
   };
 
   const handleDelete = async (id) => {
+    const monitor = monitors.find((item) => item._id === id);
+
+    if (!monitor) {
+      return;
+    }
+
     const confirmed = window.confirm(
-      "Are you sure you want to delete this monitor?"
+      `Are you sure you want to delete "${monitor.name}"?`
     );
 
-    if (!confirmed) return;
-
-    setError("");
-    setSuccess("");
+    if (!confirmed) {
+      return;
+    }
 
     try {
       await api.delete(`/monitors/${id}`);
-      setMonitors((previous) =>
-        previous.filter((monitor) => monitor._id !== id)
-      );
-      setSuccess("Monitor deleted successfully.");
+      await fetchMonitors();
     } catch (error) {
-      setError(
-        error.response?.data?.message || "Unable to delete the monitor."
-      );
+      console.error("Failed to delete monitor:", error);
     }
   };
 
