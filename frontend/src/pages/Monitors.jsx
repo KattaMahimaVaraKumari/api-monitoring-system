@@ -25,12 +25,18 @@ const Monitors = () => {
   const fetchMonitors = async () => {
     try {
       setLoading(true);
+      setError("");
 
       const response = await api.get("/monitors");
 
       setMonitors(response.data.monitors || []);
     } catch (error) {
       console.error("Failed to fetch monitors:", error);
+
+      setError(
+        error.response?.data?.message ||
+        "Unable to load monitors. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -324,8 +330,19 @@ const Monitors = () => {
             {monitors.length} monitor{monitors.length !== 1 ? "s" : ""} configured
           </p>
         </div>
+        
+        {error ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+            <p className="text-sm font-medium text-red-700">{error}</p>
 
-        {loading ? (
+            <button
+              onClick={fetchMonitors}
+              className="mt-4 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : loading ? (
           <div className="rounded-xl border border-gray-200 bg-white p-12 text-center">
             <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
 
