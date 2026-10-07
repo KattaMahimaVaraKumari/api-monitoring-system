@@ -327,10 +327,14 @@ const Dashboard = () => {
                       <p className="mt-1 text-xs text-gray-400">
                         Last checked:{" "}
                         {monitor.lastCheckedAt
-                          ? new Date(
-                              monitor.lastCheckedAt
-                            ).toLocaleString()
-                          : "Not checked yet"}
+                          ? new Date(monitor.lastCheckedAt).toLocaleString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                          : "Never"}
                       </p>
                     </div>
 
