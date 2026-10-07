@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   Activity,
   CheckCircle2,
   Clock3,
   AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 
 import api from "../services/api";
@@ -12,36 +13,61 @@ import api from "../services/api";
 const Dashboard = () => {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [incidents, setIncidents] = useState([]);
   const [monitors, setMonitors] = useState([]);
 
-  useEffect(() => {
-    const fetchDashboardMetrics = async () => {
+  const fetchDashboardData = useCallback(
+    async (showRefreshLoader = false) => {
       try {
-        const response = await api.get("/analytics/dashboard");
+        if (showRefreshLoader) {
+          setRefreshing(true);
+        }
 
-        setMetrics(response.data);
+        const [
+          analyticsResponse,
+          incidentsResponse,
+          monitorsResponse,
+        ] = await Promise.all([
+          api.get("/analytics/dashboard"),
+          api.get("/incidents"),
+          api.get("/monitors"),
+        ]);
 
-        const incidentsResponse = await api.get("/incidents");
-
+        setMetrics(analyticsResponse.data);
         setIncidents(incidentsResponse.data.incidents || []);
-
-        const monitorsResponse = await api.get("/monitors");
-
         setMonitors(monitorsResponse.data.monitors || []);
+        setError("");
       } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+
         setError(
           error.response?.data?.message ||
             "Unable to load dashboard analytics."
         );
       } finally {
         setLoading(false);
-      }
-    };
 
-    fetchDashboardMetrics();
-  }, []);
+        if (showRefreshLoader) {
+          setRefreshing(false);
+        }
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    fetchDashboardData();
+
+    const interval = setInterval(() => {
+      fetchDashboardData();
+    }, 30000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [fetchDashboardData]);
 
   const stats = [
     {
@@ -68,14 +94,29 @@ const Dashboard = () => {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Dashboard
-        </h1>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Dashboard
+          </h1>
 
-        <p className="mt-1 text-sm text-gray-500">
-          Here's an overview of your API performance.
-        </p>
+          <p className="mt-1 text-sm text-gray-500">
+            Here's an overview of your API performance.
+          </p>
+        </div>
+
+        <button
+          onClick={() => fetchDashboardData(true)}
+          disabled={refreshing}
+          className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <RefreshCw
+            size={16}
+            className={refreshing ? "animate-spin" : ""}
+          />
+
+          {refreshing ? "Refreshing..." : "Refresh"}
+        </button>
       </div>
 
       {loading ? (
@@ -140,7 +181,7 @@ const Dashboard = () => {
                 </p>
 
                 <p className="mt-2 text-xl font-semibold text-gray-900">
-                  {metrics.totalChecks}
+                  {metrics?.totalChecks ?? 0}
                 </p>
               </div>
 
@@ -150,7 +191,7 @@ const Dashboard = () => {
                 </p>
 
                 <p className="mt-2 text-xl font-semibold text-green-600">
-                  {metrics.successfulChecks}
+                  {metrics?.successfulChecks ?? 0}
                 </p>
               </div>
 
@@ -160,7 +201,7 @@ const Dashboard = () => {
                 </p>
 
                 <p className="mt-2 text-xl font-semibold text-red-600">
-                  {metrics.errorRate}%
+                  {metrics?.errorRate ?? 0}%
                 </p>
               </div>
             </div>
@@ -295,20 +336,22 @@ const Dashboard = () => {
 
                     <div className="flex shrink-0 items-center gap-4">
                       <span
-                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium capitalize ${monitor.status === "healthy"
+                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium capitalize ${
+                          monitor.status === "healthy"
                             ? "bg-green-50 text-green-700"
                             : monitor.status === "down"
-                              ? "bg-red-50 text-red-700"
-                              : "bg-gray-100 text-gray-600"
-                          }`}
+                            ? "bg-red-50 text-red-700"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
                       >
                         <span
-                          className={`h-2 w-2 rounded-full ${monitor.status === "healthy"
+                          className={`h-2 w-2 rounded-full ${
+                            monitor.status === "healthy"
                               ? "bg-green-500"
                               : monitor.status === "down"
-                                ? "bg-red-500"
-                                : "bg-gray-400"
-                            }`}
+                              ? "bg-red-500"
+                              : "bg-gray-400"
+                          }`}
                         />
 
                         {monitor.status || "unknown"}
