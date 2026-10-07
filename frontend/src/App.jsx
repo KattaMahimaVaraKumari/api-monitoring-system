@@ -24,13 +24,23 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-gray-500">
-        Checking authentication...
+      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC]">
+        <div className="text-center">
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
+
+          <p className="mt-3 text-sm text-gray-500">
+            Checking authentication...
+          </p>
+        </div>
       </div>
     );
   }
 
-  return user ? children : <Navigate to="/login" replace />;
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
 };
 
 const AppRoutes = () => {
