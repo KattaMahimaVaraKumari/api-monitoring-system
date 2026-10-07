@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Activity, Clock3, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Activity, Clock3, AlertCircle, CheckCircle2, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
 
@@ -8,10 +8,18 @@ const Analytics = () => {
   const [analytics, setAnalytics] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = async (showRefreshLoader = false) => {
     try {
-      setLoading(true);
+      if (showRefreshLoader) {
+        setRefreshing(true);
+      }
+
+      if (!showRefreshLoader) {
+        setLoading(true);
+      }
+
       setError("");
 
       const monitorsResponse = await api.get("/monitors");
@@ -61,6 +69,10 @@ const Analytics = () => {
       );
     } finally {
       setLoading(false);
+
+      if (showRefreshLoader) {
+        setRefreshing(false);
+      }
     }
   };
 
@@ -83,10 +95,26 @@ const Analytics = () => {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          View performance metrics for all your monitored APIs.
-        </p>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              View performance metrics for all your monitored APIs.
+            </p>
+          </div>
+
+          <button
+            onClick={() => fetchAnalytics(true)}
+            disabled={refreshing}
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <RefreshCw
+              size={16}
+              className={refreshing ? "animate-spin" : ""}
+            />
+            {refreshing ? "Refreshing..." : "Refresh"}
+          </button>
+        </div>
       </div>
 
       {error ? (
