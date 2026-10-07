@@ -9,56 +9,62 @@ const Analytics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const fetchAnalytics = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const monitorsResponse = await api.get("/monitors");
+
+      const monitors = monitorsResponse.data.monitors || [];
+
+      setMonitors(monitors);
+
+      const analyticsResults = await Promise.all(
+        monitors.map(async (monitor) => {
+          try {
+            const response = await api.get(
+              `/analytics/monitors/${monitor._id}`
+            );
+
+            return {
+              monitorId: monitor._id,
+              metrics: response.data.metrics,
+            };
+          } catch (error) {
+            console.error(
+              `Failed to fetch analytics for ${monitor.name}:`,
+              error
+            );
+
+            return {
+              monitorId: monitor._id,
+              metrics: null,
+            };
+          }
+        })
+      );
+
+      const metricsMap = {};
+
+      analyticsResults.forEach((result) => {
+        metricsMap[result.monitorId] = result.metrics;
+      });
+
+      setAnalytics(metricsMap);
+    } catch (error) {
+      console.error("Failed to fetch analytics:", error);
+
+      setError(
+        error.response?.data?.message ||
+          "Unable to load analytics. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchAnalytics = async () => {
-      try {
-        setLoading(true);
-
-        const monitorsResponse = await api.get("/monitors");
-
-        const monitors = monitorsResponse.data.monitors || [];
-
-        setMonitors(monitors);
-
-        const analyticsResults = await Promise.all(
-          monitors.map(async (monitor) => {
-            try {
-              const response = await api.get(
-                `/analytics/monitors/${monitor._id}`
-              );
-
-              return {
-                monitorId: monitor._id,
-                metrics: response.data.metrics,
-              };
-            } catch (error) {
-              console.error(
-                `Failed to fetch analytics for ${monitor.name}:`,
-                error
-              );
-
-              return {
-                monitorId: monitor._id,
-                metrics: null,
-              };
-            }
-          })
-        );
-
-        const metricsMap = {};
-
-        analyticsResults.forEach((result) => {
-          metricsMap[result.monitorId] = result.metrics;
-        });
-
-        setAnalytics(metricsMap);
-      } catch (error) {
-        console.error("Failed to fetch analytics:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchAnalytics();
   }, []);
 
@@ -83,13 +89,17 @@ const Analytics = () => {
         </p>
       </div>
 
-      {error && (
-        <div className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {error}
+      {error ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+          <p className="text-sm font-medium text-red-700">{error}</p>
+          <button
+            onClick={fetchAnalytics}
+            className="mt-4 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+          >
+            Try Again
+          </button>
         </div>
-      )}
-
-      {monitors.length === 0 ? (
+      ) : monitors.length === 0 ? (
         <div className="rounded-xl border border-gray-200 bg-white p-12 text-center shadow-sm">
           <Activity
             size={32}
