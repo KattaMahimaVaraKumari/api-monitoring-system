@@ -9,15 +9,13 @@ const Incidents = () => {
 
   const fetchIncidents = async () => {
     try {
-      setError("");
+      setLoading(true);
 
       const response = await api.get("/incidents");
+
       setIncidents(response.data.incidents || []);
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          "Unable to load incidents."
-      );
+      console.error("Failed to fetch incidents:", error);
     } finally {
       setLoading(false);
     }
@@ -76,8 +74,12 @@ const Incidents = () => {
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-sm text-gray-500">
-            Loading incidents...
+          <div className="rounded-xl border border-gray-200 bg-white p-12 text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
+
+            <p className="mt-4 text-sm text-gray-500">
+              Loading incidents...
+            </p>
           </div>
         ) : incidents.length === 0 ? (
           <div className="flex flex-col items-center px-6 py-14 text-center">
