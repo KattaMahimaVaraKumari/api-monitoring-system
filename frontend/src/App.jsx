@@ -17,6 +17,7 @@ import Incidents from "./pages/Incidents";
 import ApiKeys from "./pages/ApiKeys";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
+import NotFound from "./pages/NotFound";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -69,6 +70,7 @@ const AppRoutes = () => {
         <Route path="/api-keys" element={<ApiKeys />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
 
       <Route
