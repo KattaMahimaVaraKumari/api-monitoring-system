@@ -13,15 +13,13 @@ const ApiKeys = () => {
 
   const fetchKeys = async () => {
     try {
-      setError("");
+      setLoading(true);
 
       const response = await api.get("/keys");
+
       setKeys(response.data.apiKeys || response.data.keys || []);
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          "Unable to load API keys."
-      );
+      console.error("Failed to fetch API keys:", error);
     } finally {
       setLoading(false);
     }
