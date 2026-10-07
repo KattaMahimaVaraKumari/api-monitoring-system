@@ -12,45 +12,48 @@ const Analytics = () => {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        setError("");
+        setLoading(true);
 
         const monitorsResponse = await api.get("/monitors");
-        const monitorList = monitorsResponse.data.monitors || [];
 
-        setMonitors(monitorList);
+        const monitors = monitorsResponse.data.monitors || [];
 
-        const results = await Promise.all(
-          monitorList.map(async (monitor) => {
+        setMonitors(monitors);
+
+        const analyticsResults = await Promise.all(
+          monitors.map(async (monitor) => {
             try {
               const response = await api.get(
                 `/analytics/monitors/${monitor._id}`
               );
 
               return {
-                id: monitor._id,
+                monitorId: monitor._id,
                 metrics: response.data.metrics,
               };
-            } catch {
+            } catch (error) {
+              console.error(
+                `Failed to fetch analytics for ${monitor.name}:`,
+                error
+              );
+
               return {
-                id: monitor._id,
+                monitorId: monitor._id,
                 metrics: null,
               };
             }
           })
         );
 
-        const analyticsMap = {};
+        const metricsMap = {};
 
-        results.forEach((result) => {
-          analyticsMap[result.id] = result.metrics;
+        analyticsResults.forEach((result) => {
+          metricsMap[result.monitorId] = result.metrics;
         });
 
-        setAnalytics(analyticsMap);
+        setAnalytics(metricsMap);
       } catch (error) {
-        setError(
-          error.response?.data?.message ||
-            "Unable to load analytics."
-        );
+        console.error("Failed to fetch analytics:", error);
       } finally {
         setLoading(false);
       }
@@ -61,8 +64,12 @@ const Analytics = () => {
 
   if (loading) {
     return (
-      <div className="p-12 text-center text-sm text-gray-500">
-        Loading analytics...
+      <div className="rounded-xl border border-gray-200 bg-white p-12 text-center">
+        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
+
+        <p className="mt-4 text-sm text-gray-500">
+          Loading analytics...
+        </p>
       </div>
     );
   }
