@@ -22,6 +22,7 @@ const Monitors = () => {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchMonitors = async (showRefreshLoader = false) => {
     try {
@@ -153,6 +154,15 @@ const Monitors = () => {
     unknown: "bg-gray-100 text-gray-600",
   };
 
+  const filteredMonitors = monitors.filter((monitor) => {
+    const search = searchTerm.trim().toLowerCase();
+
+    return (
+      monitor.name?.toLowerCase().includes(search) ||
+      monitor.url?.toLowerCase().includes(search)
+    );
+  });
+
   useEffect(() => {
     fetchMonitors();
   }, []);
@@ -188,6 +198,17 @@ const Monitors = () => {
             Add Monitor
           </button>
         </div>
+      </div>
+
+      <div className="mb-5">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search monitors by name or URL..."
+          aria-label="Search monitors by name or URL"
+          className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-gray-400 sm:max-w-md"
+        />
       </div>
 
       {success && (
@@ -343,13 +364,16 @@ const Monitors = () => {
         <div className="border-b border-gray-200 px-6 py-5">
           <h2 className="font-semibold text-gray-900">All Monitors</h2>
           <p className="mt-1 text-sm text-gray-500">
-            {monitors.length} monitor{monitors.length !== 1 ? "s" : ""} configured
+            {monitors.length} monitor
+            {monitors.length !== 1 ? "s" : ""} configured
           </p>
         </div>
-        
+
         {error ? (
           <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-            <p className="text-sm font-medium text-red-700">{error}</p>
+            <p className="text-sm font-medium text-red-700">
+              {error}
+            </p>
 
             <button
               onClick={fetchMonitors}
@@ -361,7 +385,6 @@ const Monitors = () => {
         ) : loading ? (
           <div className="rounded-xl border border-gray-200 bg-white p-12 text-center">
             <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
-
             <p className="mt-4 text-sm text-gray-500">
               Loading monitors...
             </p>
@@ -388,6 +411,21 @@ const Monitors = () => {
               Add Your First Monitor
             </button>
           </div>
+        ) : filteredMonitors.length === 0 ? (
+          <div className="px-6 py-14 text-center">
+            <h3 className="font-semibold text-gray-900">
+              No monitors match your search
+            </h3>
+            <p className="mt-2 text-sm text-gray-500">
+              Try another monitor name or URL, or clear your search.
+            </p>
+            <button
+              onClick={() => setSearchTerm("")}
+              className="mt-4 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Clear Search
+            </button>
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -397,12 +435,14 @@ const Monitors = () => {
                   <th className="px-6 py-4 font-medium">Status</th>
                   <th className="px-6 py-4 font-medium">Interval</th>
                   <th className="px-6 py-4 font-medium">Last Checked</th>
-                  <th className="px-6 py-4 text-right font-medium">Actions</th>
+                  <th className="px-6 py-4 text-right font-medium">
+                    Actions
+                  </th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-gray-100">
-                {monitors.map((monitor) => (
+                {filteredMonitors.map((monitor) => (
                   <tr key={monitor._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <Link
@@ -411,9 +451,11 @@ const Monitors = () => {
                       >
                         {monitor.name}
                       </Link>
+
                       <p className="mt-1 max-w-xs truncate text-sm text-gray-500">
                         {monitor.url}
                       </p>
+
                       <span className="mt-1 inline-block rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
                         {monitor.method}
                       </span>
