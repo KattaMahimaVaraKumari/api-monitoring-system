@@ -6,10 +6,18 @@ const Incidents = () => {
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchIncidents = async () => {
+  const fetchIncidents = async (showRefreshLoader = false) => {
     try {
-      setLoading(true);
+      if (showRefreshLoader) {
+        setRefreshing(true);
+      }
+
+      if (!showRefreshLoader) {
+        setLoading(true);
+      }
+
       setError("");
 
       const response = await api.get("/incidents");
@@ -24,6 +32,10 @@ const Incidents = () => {
       );
     } finally {
       setLoading(false);
+
+      if (showRefreshLoader) {
+        setRefreshing(false);
+      }
     }
   };
 
@@ -53,11 +65,15 @@ const Incidents = () => {
         </div>
 
         <button
-          onClick={fetchIncidents}
-          className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          onClick={() => fetchIncidents(true)}
+          disabled={refreshing}
+          className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          <RefreshCw size={16} />
-          Refresh
+          <RefreshCw
+            size={16}
+            className={refreshing ? "animate-spin" : ""}
+          />
+          {refreshing ? "Refreshing..." : "Refresh"}
         </button>
       </div>
 
