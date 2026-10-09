@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { KeyRound, Plus, Copy, Trash2, Check } from "lucide-react";
+import { KeyRound, Plus, Copy, Trash2, Check, RefreshCw } from "lucide-react";
 import api from "../services/api";
 
 const ApiKeys = () => {
@@ -10,14 +10,18 @@ const ApiKeys = () => {
   const [error, setError] = useState("");
   const [newKey, setNewKey] = useState("");
   const [copied, setCopied] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchKeys = async () => {
+  const fetchKeys = async (showRefreshLoader = false) => {
     try {
-      setLoading(true);
+      if (showRefreshLoader) {
+        setRefreshing(true);
+      }
+
+      setLoading(!showRefreshLoader);
       setError("");
 
       const response = await api.get("/keys");
-
       setKeys(response.data.apiKeys || response.data.keys || []);
     } catch (error) {
       console.error("Failed to fetch API keys:", error);
@@ -28,6 +32,10 @@ const ApiKeys = () => {
       );
     } finally {
       setLoading(false);
+
+      if (showRefreshLoader) {
+        setRefreshing(false);
+      }
     }
   };
 
@@ -90,12 +98,26 @@ const ApiKeys = () => {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">API Keys</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Create and manage API keys for accessing your monitoring system.
-        </p>
-      </div>
+      <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">API Keys</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Create and manage API keys for accessing your monitoring system.
+          </p>
+        </div>
+
+  <button
+    onClick={() => fetchKeys(true)}
+    disabled={refreshing}
+    className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+  >
+    <RefreshCw
+      size={16}
+      className={refreshing ? "animate-spin" : ""}
+    />
+    {refreshing ? "Refreshing..." : "Refresh"}
+  </button>
+</div>
 
       {error && (
         <div className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
