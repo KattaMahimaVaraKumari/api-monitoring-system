@@ -23,6 +23,7 @@ const Monitors = () => {
   const [form, setForm] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const fetchMonitors = async (showRefreshLoader = false) => {
     try {
@@ -155,12 +156,17 @@ const Monitors = () => {
   };
 
   const filteredMonitors = monitors.filter((monitor) => {
-    const search = searchTerm.trim().toLowerCase();
+    const search = searchTerm.toLowerCase();
 
-    return (
+    const matchesSearch =
       monitor.name?.toLowerCase().includes(search) ||
-      monitor.url?.toLowerCase().includes(search)
-    );
+      monitor.url?.toLowerCase().includes(search);
+
+    const matchesStatus =
+      statusFilter === "all" ||
+      (monitor.status || "unknown") === statusFilter;
+
+    return matchesSearch && matchesStatus;
   });
 
   useEffect(() => {
@@ -200,7 +206,7 @@ const Monitors = () => {
         </div>
       </div>
 
-      <div className="mb-5">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row">
         <input
           type="text"
           value={searchTerm}
@@ -209,6 +215,18 @@ const Monitors = () => {
           aria-label="Search monitors by name or URL"
           className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-gray-400 sm:max-w-md"
         />
+
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          aria-label="Filter monitors by status"
+          className="rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none focus:border-gray-400"
+        >
+          <option value="all">All statuses</option>
+          <option value="healthy">Healthy</option>
+          <option value="down">Down</option>
+          <option value="unknown">Unknown</option>
+        </select>
       </div>
 
       {success && (
@@ -411,21 +429,26 @@ const Monitors = () => {
               Add Your First Monitor
             </button>
           </div>
-        ) : filteredMonitors.length === 0 ? (
-          <div className="px-6 py-14 text-center">
-            <h3 className="font-semibold text-gray-900">
-              No monitors match your search
-            </h3>
-            <p className="mt-2 text-sm text-gray-500">
-              Try another monitor name or URL, or clear your search.
-            </p>
-            <button
-              onClick={() => setSearchTerm("")}
-              className="mt-4 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Clear Search
-            </button>
-          </div>
+            ) : filteredMonitors.length === 0 ? (
+              <div className="px-6 py-14 text-center">
+                <h3 className="font-semibold text-gray-900">
+                  No matching monitors
+                </h3>
+
+                <p className="mt-2 text-sm text-gray-500">
+                  No monitors match your search or selected status.
+                </p>
+
+                <button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setStatusFilter("all");
+                  }}
+                  className="mt-4 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Clear Filters
+                </button>
+              </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -515,3 +538,5 @@ const Monitors = () => {
 };
 
 export default Monitors;
+
+filteredMonitors
