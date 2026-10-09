@@ -24,6 +24,7 @@ const Monitors = () => {
   const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("name");
 
   const fetchMonitors = async (showRefreshLoader = false) => {
     try {
@@ -169,6 +170,21 @@ const Monitors = () => {
     return matchesSearch && matchesStatus;
   });
 
+  const sortedMonitors = [...filteredMonitors].sort((a, b) => {
+    if (sortBy === "name") {
+      return (a.name || "").localeCompare(b.name || "");
+    }
+
+    if (sortBy === "recent") {
+      return (
+        new Date(b.lastCheckedAt || 0).getTime() -
+        new Date(a.lastCheckedAt || 0).getTime()
+      );
+    }
+
+    return 0;
+  });
+
   useEffect(() => {
     fetchMonitors();
   }, []);
@@ -205,7 +221,7 @@ const Monitors = () => {
           </button>
         </div>
       </div>
-
+ 
       <div className="mb-5 flex flex-col gap-3 sm:flex-row">
         <input
           type="text"
@@ -226,6 +242,16 @@ const Monitors = () => {
           <option value="healthy">Healthy</option>
           <option value="down">Down</option>
           <option value="unknown">Unknown</option>
+        </select>
+
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          aria-label="Sort monitors"
+          className="rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none focus:border-gray-400"
+        >
+          <option value="name">Name (A–Z)</option>
+          <option value="recent">Recently checked</option>
         </select>
       </div>
 
@@ -465,7 +491,7 @@ const Monitors = () => {
               </thead>
 
               <tbody className="divide-y divide-gray-100">
-                {filteredMonitors.map((monitor) => (
+                {sortedMonitors.map((monitor) => (
                   <tr key={monitor._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <Link
@@ -538,5 +564,3 @@ const Monitors = () => {
 };
 
 export default Monitors;
-
-filteredMonitors
