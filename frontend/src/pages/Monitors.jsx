@@ -196,6 +196,18 @@ const Monitors = () => {
     startIndex + monitorsPerPage
   );
 
+  const healthyCount = monitors.filter(
+    (monitor) => monitor.status === "healthy"
+  ).length;
+
+  const downCount = monitors.filter(
+    (monitor) => monitor.status === "down"
+  ).length;
+
+  const unknownCount = monitors.filter(
+    (monitor) => !monitor.status || monitor.status === "unknown"
+  ).length;
+
   useEffect(() => {
     fetchMonitors();
   }, []);
@@ -236,6 +248,30 @@ const Monitors = () => {
           </button>
         </div>
       </div>
+
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="rounded-xl border border-gray-200 bg-white p-5">
+          <p className="text-sm text-gray-500">Healthy APIs</p>
+          <p className="mt-2 text-2xl font-bold text-green-600">
+            {healthyCount}
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-gray-200 bg-white p-5">
+          <p className="text-sm text-gray-500">Down APIs</p>
+          <p className="mt-2 text-2xl font-bold text-red-600">
+            {downCount}
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-gray-200 bg-white p-5">
+          <p className="text-sm text-gray-500">Unknown Status</p>
+          <p className="mt-2 text-2xl font-bold text-gray-600">
+            {unknownCount}
+          </p>
+        </div>
+      </div>
+
       <div className="mb-5 flex flex-col gap-3 sm:flex-row">
         <input
           type="text"
