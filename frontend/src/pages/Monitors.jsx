@@ -53,7 +53,9 @@ const Monitors = () => {
 
             return {
               id: monitor._id,
-              uptime: analyticsResponse.data.metrics?.uptime ?? 0,
+              uptime: analyticsResponse.data.metrics?.uptime ?? null,
+              averageLatency:
+                analyticsResponse.data.metrics?.averageLatency ?? null,
             };
           } catch (error) {
             console.error(
@@ -64,6 +66,7 @@ const Monitors = () => {
             return {
               id: monitor._id,
               uptime: null,
+              averageLatency: null,
             };
           }
         })
@@ -72,7 +75,10 @@ const Monitors = () => {
       const metricsMap = {};
 
       results.forEach((result) => {
-        metricsMap[result.id] = result.uptime;
+        metricsMap[result.id] = {
+          uptime: result.uptime,
+          averageLatency: result.averageLatency,
+        };
       });
 
       setMonitorMetrics(metricsMap);
@@ -621,9 +627,18 @@ const Monitors = () => {
                     </td>
 
                     <td className="px-6 py-4 text-sm text-gray-600">
-                      {monitorMetrics[monitor._id] == null
-                        ? "Unavailable"
-                        : `${monitorMetrics[monitor._id]}%`}
+                      <p className="mt-2 text-xs text-gray-500">
+                        Uptime:{" "}
+                        {monitorMetrics[monitor._id]?.uptime == null
+                          ? "Unavailable"
+                          : `${monitorMetrics[monitor._id].uptime}%`}
+                      </p>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Average latency:{" "}
+                        {monitorMetrics[monitor._id]?.averageLatency == null
+                          ? "Unavailable"
+                          : `${monitorMetrics[monitor._id].averageLatency} ms`}
+                      </p>
                     </td>
 
                     <td className="px-6 py-4">
