@@ -26,6 +26,7 @@ const Monitors = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const [currentPage, setCurrentPage] = useState(1);
+  const [monitorMetrics, setMonitorMetrics] = useState({});
 
   const monitorsPerPage = 5;
 
@@ -38,9 +39,43 @@ const Monitors = () => {
       }
 
       setError("");
-
       const response = await api.get("/monitors");
-      setMonitors(response.data.monitors || []);
+
+      const monitorsList = response.data.monitors || [];
+      setMonitors(monitorsList);
+
+      const results = await Promise.all(
+        monitorsList.map(async (monitor) => {
+          try {
+            const analyticsResponse = await api.get(
+              `/analytics/monitors/${monitor._id}`
+            );
+
+            return {
+              id: monitor._id,
+              uptime: analyticsResponse.data.metrics?.uptime ?? 0,
+            };
+          } catch (error) {
+            console.error(
+              `Failed to fetch uptime for ${monitor.name}:`,
+              error
+            );
+
+            return {
+              id: monitor._id,
+              uptime: null,
+            };
+          }
+        })
+      );
+
+      const metricsMap = {};
+
+      results.forEach((result) => {
+        metricsMap[result.id] = result.uptime;
+      });
+
+      setMonitorMetrics(metricsMap);
     } catch (error) {
       console.error("Failed to fetch monitors:", error);
 
@@ -537,6 +572,7 @@ const Monitors = () => {
                   <th className="px-6 py-4 font-medium">Status</th>
                   <th className="px-6 py-4 font-medium">Interval</th>
                   <th className="px-6 py-4 font-medium">Last Checked</th>
+                  <th className="px-6 py-4 font-medium">Uptime</th>
                   <th className="px-6 py-4 text-right font-medium">
                     Actions
                   </th>
@@ -582,6 +618,12 @@ const Monitors = () => {
                       {monitor.lastCheckedAt
                         ? new Date(monitor.lastCheckedAt).toLocaleString()
                         : "Not checked yet"}
+                    </td>
+
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {monitorMetrics[monitor._id] == null
+                        ? "Unavailable"
+                        : `${monitorMetrics[monitor._id]}%`}
                     </td>
 
                     <td className="px-6 py-4">
