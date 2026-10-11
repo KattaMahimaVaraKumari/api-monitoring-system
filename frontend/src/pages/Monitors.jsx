@@ -56,6 +56,7 @@ const Monitors = () => {
               uptime: analyticsResponse.data.metrics?.uptime ?? null,
               averageLatency:
                 analyticsResponse.data.metrics?.averageLatency ?? null,
+              errorRate: analyticsResponse.data.metrics?.errorRate ?? null,
             };
           } catch (error) {
             console.error(
@@ -67,6 +68,7 @@ const Monitors = () => {
               id: monitor._id,
               uptime: null,
               averageLatency: null,
+                errorRate: null,
             };
           }
         })
@@ -78,6 +80,7 @@ const Monitors = () => {
         metricsMap[result.id] = {
           uptime: result.uptime,
           averageLatency: result.averageLatency,
+          errorRate: result.errorRate,
         };
       });
 
@@ -638,6 +641,12 @@ const Monitors = () => {
                         {monitorMetrics[monitor._id]?.averageLatency == null
                           ? "Unavailable"
                           : `${monitorMetrics[monitor._id].averageLatency} ms`}
+                      </p>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Error rate:{" "}
+                        {monitorMetrics[monitor._id]?.errorRate == null
+                          ? "Unavailable"
+                          : `${monitorMetrics[monitor._id].errorRate}%`}
                       </p>
                     </td>
 
