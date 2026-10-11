@@ -25,21 +25,21 @@ const Monitors = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("name");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const monitorsPerPage = 5;
 
   const fetchMonitors = async (showRefreshLoader = false) => {
     try {
       if (showRefreshLoader) {
         setRefreshing(true);
-      }
-
-      if (!showRefreshLoader) {
+      } else {
         setLoading(true);
       }
 
       setError("");
 
       const response = await api.get("/monitors");
-
       setMonitors(response.data.monitors || []);
     } catch (error) {
       console.error("Failed to fetch monitors:", error);
@@ -185,9 +185,24 @@ const Monitors = () => {
     return 0;
   });
 
+  const totalPages = Math.ceil(
+    sortedMonitors.length / monitorsPerPage
+  );
+
+  const startIndex = (currentPage - 1) * monitorsPerPage;
+
+  const paginatedMonitors = sortedMonitors.slice(
+    startIndex,
+    startIndex + monitorsPerPage
+  );
+
   useEffect(() => {
     fetchMonitors();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, sortBy]);
 
   return (
     <div>
@@ -221,7 +236,6 @@ const Monitors = () => {
           </button>
         </div>
       </div>
- 
       <div className="mb-5 flex flex-col gap-3 sm:flex-row">
         <input
           type="text"
@@ -264,7 +278,10 @@ const Monitors = () => {
       {error && (
         <div className="mb-5 flex items-start justify-between gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           <span>{error}</span>
-          <button onClick={() => setError("")} aria-label="Dismiss error">
+          <button
+            onClick={() => setError("")}
+            aria-label="Dismiss error"
+          >
             <X size={18} />
           </button>
         </div>
@@ -420,7 +437,7 @@ const Monitors = () => {
             </p>
 
             <button
-              onClick={fetchMonitors}
+              onClick={() => fetchMonitors()}
               className="mt-4 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
             >
               Try Again
@@ -455,26 +472,26 @@ const Monitors = () => {
               Add Your First Monitor
             </button>
           </div>
-            ) : filteredMonitors.length === 0 ? (
-              <div className="px-6 py-14 text-center">
-                <h3 className="font-semibold text-gray-900">
-                  No matching monitors
-                </h3>
+        ) : filteredMonitors.length === 0 ? (
+          <div className="px-6 py-14 text-center">
+            <h3 className="font-semibold text-gray-900">
+              No matching monitors
+            </h3>
 
-                <p className="mt-2 text-sm text-gray-500">
-                  No monitors match your search or selected status.
-                </p>
+            <p className="mt-2 text-sm text-gray-500">
+              No monitors match your search or selected status.
+            </p>
 
-                <button
-                  onClick={() => {
-                    setSearchTerm("");
-                    setStatusFilter("all");
-                  }}
-                  className="mt-4 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Clear Filters
-                </button>
-              </div>
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                setStatusFilter("all");
+              }}
+              className="mt-4 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Clear Filters
+            </button>
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -491,7 +508,7 @@ const Monitors = () => {
               </thead>
 
               <tbody className="divide-y divide-gray-100">
-                {sortedMonitors.map((monitor) => (
+                {paginatedMonitors.map((monitor) => (
                   <tr key={monitor._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <Link
@@ -556,6 +573,37 @@ const Monitors = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {!error && !loading && sortedMonitors.length > 0 && (
+          <div className="flex flex-col gap-3 border-t border-gray-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-gray-500">
+              Showing {startIndex + 1}–
+              {Math.min(
+                startIndex + monitorsPerPage,
+                sortedMonitors.length
+              )}{" "}
+              of {sortedMonitors.length}
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage((page) => page - 1)}
+                disabled={currentPage === 1}
+                className="rounded-lg border border-gray-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Previous
+              </button>
+
+              <button
+                onClick={() => setCurrentPage((page) => page + 1)}
+                disabled={currentPage >= totalPages}
+                className="rounded-lg border border-gray-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
       </div>
