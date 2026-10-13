@@ -1,19 +1,28 @@
 import cron from "node-cron";
 import Monitor from "../models/Monitor.js";
-import checkMonitor from "../services/monitoringService.js"
+import checkMonitor from "../services/monitoringService.js";
 
 const startMonitorJob = () => {
-    cron.schedule("* * * * *", async ()=>{
+    let isJobRunning = false;
+
+    cron.schedule("* * * * *", async () => {
+        if (isJobRunning) {
+            console.log("Previous monitor job is still running. Skipping this run.");
+            return;
+        }
+
+        isJobRunning = true;
+        
         console.log("Running monitor job...");
 
-        try{
+        try {
             const monitors = await Monitor.find({
                 active: true,
             });
 
-            const now = Date.now();
+            for (const monitor of monitors) {
+                const now = Date.now();
 
-            for(const monitor of monitors){
                 const intervalMs = monitor.interval * 60 * 1000;
 
                 const lastChecked = monitor.lastCheckedAt
@@ -22,18 +31,19 @@ const startMonitorJob = () => {
 
                 const timeSinceLastCheck = now - lastChecked;
 
-                if(timeSinceLastCheck >= intervalMs){
+                if (timeSinceLastCheck >= intervalMs) {
                     await checkMonitor(monitor);
 
                     console.log(`Checked: ${monitor.name}`);
                 }
             }
-
-        } catch(error){
-            console.error("Monitor job failed:" , error.message);
+        } catch (error) {
+            console.error("Monitor job failed:", error.message);
+        } finally {
+            isJobRunning = false;
         }
     });
     console.log("Monitor job started");
-}
+};
 
 export default startMonitorJob;
