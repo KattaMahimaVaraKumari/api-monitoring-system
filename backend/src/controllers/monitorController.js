@@ -4,6 +4,18 @@ import checkMonitor from "../services/monitoringService.js";
 export const createMonitor = async (req, res)=>{
     try{
         const {name, url, method, expectedStatus, interval, timeout,} = req.body;
+        
+        const existingMonitor = await Monitor.findOne({
+            userId: req.user._id,
+            url: req.body.url,
+            method: req.body.method || "GET",
+        });
+
+        if (existingMonitor) {
+            return res.status(409).json({
+                message: "You already have a monitor for this URL and method",
+            });
+        }
 
         const monitor = await Monitor.create({userId: req.user._id, name, url, method, expectedStatus, interval, timeout});
 
