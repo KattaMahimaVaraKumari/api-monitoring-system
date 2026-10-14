@@ -8,6 +8,8 @@ export const createIncidentIfNeeded = async (monitorId, reason) => {
     });
 
     if (existingIncident) {
+        existingIncident.reason = reason;
+        await existingIncident.save();
         return existingIncident;
     }
 
