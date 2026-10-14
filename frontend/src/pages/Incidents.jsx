@@ -180,9 +180,12 @@ const Incidents = () => {
                               "Unknown Monitor"}
                           </p>
 
-                          {incident.errorMessage && (
-                            <p className="mt-1 max-w-xs truncate text-sm text-gray-500">
-                              {incident.errorMessage}
+                          {(incident.reason || incident.errorMessage) && (
+                            <p
+                              title={incident.reason || incident.errorMessage}
+                              className="mt-1 max-w-xs truncate text-sm text-gray-500"
+                            >
+                              {incident.reason || incident.errorMessage}
                             </p>
                           )}
                         </div>
