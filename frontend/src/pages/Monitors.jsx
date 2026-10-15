@@ -644,14 +644,14 @@ const Monitors = () => {
                       </span>
                     </td>
 
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4">       
                       <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-medium capitalize ${
-                          statusStyles[monitor.status] ||
-                          statusStyles.unknown
-                        }`}
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-medium capitalize ${!monitor.active
+                            ? "bg-gray-100 text-gray-600"
+                            : statusStyles[monitor.status] || statusStyles.unknown
+                          }`}
                       >
-                        {monitor.status || "unknown"}
+                        {!monitor.active ? "Inactive" : monitor.status || "unknown"}
                       </span>
                     </td>
 
