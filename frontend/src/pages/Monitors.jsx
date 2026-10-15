@@ -27,6 +27,7 @@ const Monitors = () => {
   const [sortBy, setSortBy] = useState("name");
   const [currentPage, setCurrentPage] = useState(1);
   const [monitorMetrics, setMonitorMetrics] = useState({});
+  const [togglingId, setTogglingId] = useState(null);
 
   const monitorsPerPage = 5;
 
@@ -168,6 +169,41 @@ const Monitors = () => {
       );
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleToggleActive = async (monitor) => {
+    setTogglingId(monitor._id);
+    setError("");
+    setSuccess("");
+
+    try {
+      const newActiveState = !monitor.active;
+
+      await api.put(`/monitors/${monitor._id}`, {
+        active: newActiveState,
+      });
+
+      setMonitors((previous) =>
+        previous.map((item) =>
+          item._id === monitor._id
+            ? { ...item, active: newActiveState }
+            : item
+        )
+      );
+
+      setSuccess(
+        newActiveState
+          ? "Monitor activated successfully."
+          : "Monitor deactivated successfully."
+      );
+    } catch (error) {
+      setError(
+        error.response?.data?.message ||
+        "Unable to update monitor status. Please try again."
+      );
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -652,6 +688,23 @@ const Monitors = () => {
 
                     <td className="px-6 py-4">
                       <div className="flex justify-end gap-3">
+                        <button
+                          onClick={() => handleToggleActive(monitor)}
+                          disabled={togglingId === monitor._id}
+                          className={`text-xs font-medium cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${monitor.active
+                              ? "text-orange-600 hover:text-orange-700"
+                              : "text-green-600 hover:text-green-700"
+                            }`}
+                          aria-label={`${monitor.active ? "Deactivate" : "Activate"} ${monitor.name}`}
+                          title={monitor.active ? "Deactivate monitor" : "Activate monitor"}
+                        >
+                          {togglingId === monitor._id
+                            ? "Updating..."
+                            : monitor.active
+                              ? "Deactivate"
+                              : "Activate"}
+                        </button>
+
                         <button
                           onClick={() => openEditForm(monitor)}
                           className="text-gray-500 hover:text-blue-600"
