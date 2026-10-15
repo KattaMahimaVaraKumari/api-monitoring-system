@@ -21,20 +21,26 @@ const startMonitorJob = () => {
             });
 
             for (const monitor of monitors) {
-                const now = Date.now();
+                try {
+                    const now = Date.now();
+                    const intervalMs = monitor.interval * 60 * 1000;
 
-                const intervalMs = monitor.interval * 60 * 1000;
+                    const lastChecked = monitor.lastCheckedAt
+                        ? monitor.lastCheckedAt.getTime()
+                        : 0;
 
-                const lastChecked = monitor.lastCheckedAt
-                    ? monitor.lastCheckedAt.getTime()
-                    : 0;
+                    const timeSinceLastCheck = now - lastChecked;
 
-                const timeSinceLastCheck = now - lastChecked;
+                    if (timeSinceLastCheck >= intervalMs) {
+                        await checkMonitor(monitor);
 
-                if (timeSinceLastCheck >= intervalMs) {
-                    await checkMonitor(monitor);
-
-                    console.log(`Checked: ${monitor.name}`);
+                        console.log(`Checked: ${monitor.name}`);
+                    }
+                } catch (error) {
+                    console.error(
+                        `Failed to process monitor ${monitor.name}:`,
+                        error.message
+                    );
                 }
             }
         } catch (error) {
