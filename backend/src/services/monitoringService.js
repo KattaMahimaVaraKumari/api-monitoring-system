@@ -16,12 +16,16 @@ const checkMonitor = async (monitor) => {
             controller.abort();
         }, monitor.timeout * 1000);
 
-        const response = await fetch(monitor.url, {
-            method: monitor.method,
-            signal: controller.signal,
-        });
+        let response;
 
-        clearTimeout(timeoutId);
+        try {
+            response = await fetch(monitor.url, {
+                method: monitor.method,
+                signal: controller.signal,
+            });
+        } finally {
+            clearTimeout(timeoutId);
+        }
 
         const responseTime = Date.now() - startTime;
 
