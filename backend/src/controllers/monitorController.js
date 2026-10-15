@@ -154,6 +154,12 @@ export const testMonitor = async (req, res) => {
             });
         }
 
+        if (!monitor.active) {
+            return res.status(400).json({
+                message: "Cannot test an inactive monitor. Activate it first.",
+            });
+        }
+
         const result = await checkMonitor(monitor);
 
         res.json({
