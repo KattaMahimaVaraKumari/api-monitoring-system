@@ -57,9 +57,9 @@ export const getMonitor = async (req, res) => {
             userId: req.user._id,
         });
 
-        if (!monitor) {
-            return res.status(404).json({
-                message: "Monitor not found",
+        if (!monitor.active) {
+            return res.status(400).json({
+                message: "Cannot test an inactive monitor. Activate it first.",
             });
         }
 
