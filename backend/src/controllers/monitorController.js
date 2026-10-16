@@ -23,9 +23,10 @@ export const createMonitor = async (req, res)=>{
             message: "Monitor created successfully", monitor,
         });
     } catch(error){
+        console.error("Monitor controller error:", error);
+
         res.status(500).json({
-            message: "Server error",
-            error: error.message,
+            message: "Internal server error",
         });
     }
 }
@@ -42,10 +43,11 @@ export const getMonitors = async (req,res) =>{
         });
 
     } catch (error) {
+        console.error("Monitor controller error:", error);
+
         res.status(500).json({
-            message: "Server error",
-            error: error.message,
-        });
+            message: "Internal server error",
+});
     }
 }
 
@@ -68,9 +70,10 @@ export const getMonitor = async (req, res) => {
         });
 
     } catch (error) {
+        console.error("Monitor controller error:", error);
+
         res.status(500).json({
-            message: "Server error",
-            error: error.message,
+            message: "Internal server error",
         });
     }
 }
@@ -107,10 +110,11 @@ export const updateMonitor = async (req, res) => {
         });
 
     } catch (error) {
+        console.error("Monitor controller error:", error);
+
         res.status(500).json({
-            message: "Server error",
-            error: error.message,
-        })
+            message: "Internal server error",
+        });
     }
 }
 
@@ -133,9 +137,10 @@ export const deleteMonitor = async(req,res) =>{
         });
 
     } catch (error){
+        console.error("Monitor controller error:", error);
+
         res.status(500).json({
-            message: "Server error",
-            error: error.message,
+            message: "Internal server error",
         });
     }
 };
@@ -167,9 +172,10 @@ export const testMonitor = async (req, res) => {
             result,
         });
     } catch (error) {
+        console.error("Monitor controller error:", error);
+
         res.status(500).json({
-            message: "Server error",
-            error: error.message,
+            message: "Internal server error",
         });
     }
 };
