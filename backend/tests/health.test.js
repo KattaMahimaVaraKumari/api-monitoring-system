@@ -17,7 +17,6 @@ test("GET /api/health returns a healthy response", async () => {
 });
 
 
-
 test("GET / returns the backend welcome message", async () => {
   const response = await request(app).get("/");
 
@@ -29,7 +28,6 @@ test("GET / returns the backend welcome message", async () => {
 });
 
 
-
 test("GET /unknown-route returns 404", async () => {
   const response = await request(app).get("/unknown-route");
 
@@ -38,4 +36,14 @@ test("GET /unknown-route returns 404", async () => {
     response.body.message,
     "Route not found: GET /unknown-route"
   );
+});
+
+
+test("POST with malformed JSON returns 400", async () => {
+  const response = await request(app)
+    .post("/api/auth/register")
+    .set("Content-Type", "application/json")
+    .send('{"name":');
+
+  assert.equal(response.status, 400);
 });
