@@ -2,7 +2,7 @@
 
 A full-stack API monitoring platform for tracking endpoint availability, detecting failures, and managing incidents through a centralized dashboard.
 
-[**Live Demo**](https://api-monitoring-system-omega.vercel.app) · [**Source Code**](https://github.com/KattaMahimaVaraKumari/api-monitoring-system)
+[**Live Demo**](https://api-monitoring-sy-git-6fd773-katta-mahima-vara-kumaris-projects.vercel.app/) · [**Source Code**](https://github.com/KattaMahimaVaraKumari/api-monitoring-system)
 
 ## Demo Credentials
 
