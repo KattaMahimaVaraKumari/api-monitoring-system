@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Activity, Plus, Pencil, Trash2, X, RefreshCw } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import api from "../services/api";
 
 const initialForm = {
@@ -13,6 +13,8 @@ const initialForm = {
 };
 
 const Monitors = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchTerm = searchParams.get("search") || "";
   const [monitors, setMonitors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -22,7 +24,6 @@ const Monitors = () => {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,6 +31,16 @@ const Monitors = () => {
   const [togglingId, setTogglingId] = useState(null);
 
   const monitorsPerPage = 5;
+
+  const setSearchTerm = (value) => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (value) {
+      nextParams.set("search", value);
+    } else {
+      nextParams.delete("search");
+    }
+    setSearchParams(nextParams, { replace: true });
+  };
 
   const fetchMonitors = async (showRefreshLoader = false) => {
     try {
@@ -591,7 +602,7 @@ const Monitors = () => {
         ) : filteredMonitors.length === 0 ? (
           <div className="px-6 py-14 text-center">
             <h3 className="font-semibold text-gray-900">
-              No matching monitors
+              No matching monitors found
             </h3>
 
             <p className="mt-2 text-sm text-gray-500">

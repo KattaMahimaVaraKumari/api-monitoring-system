@@ -1,8 +1,45 @@
-import { LogOut, Search } from "lucide-react";
+import { LogOut, Search, X } from "lucide-react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchTerm =
+    location.pathname === "/monitors"
+      ? searchParams.get("search") || ""
+      : "";
+
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+
+    if (location.pathname !== "/monitors") {
+      if (value) {
+        navigate(`/monitors?search=${encodeURIComponent(value)}`, {
+          replace: true,
+        });
+      }
+      return;
+    }
+
+    const nextParams = new URLSearchParams(searchParams);
+    if (value) {
+      nextParams.set("search", value);
+    } else {
+      nextParams.delete("search");
+    }
+    setSearchParams(nextParams, { replace: true });
+  };
+
+  const clearSearch = () => {
+    if (location.pathname === "/monitors") {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("search");
+      setSearchParams(nextParams, { replace: true });
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -26,9 +63,23 @@ const Navbar = () => {
 
           <input
             type="text"
-            placeholder="Search..."
-            className="w-64 rounded-lg border border-gray-200 bg-gray-50 py-2 pl-10 pr-4 text-sm outline-none transition focus:border-gray-300 focus:bg-white"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            placeholder="Search monitors by name or URL..."
+            aria-label="Search monitors by name or URL"
+            className="w-64 rounded-lg border border-gray-200 bg-gray-50 py-2 pl-10 pr-10 text-sm outline-none transition focus:border-gray-300 focus:bg-white"
           />
+
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              aria-label="Clear monitor search"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-gray-400 transition hover:bg-gray-200 hover:text-gray-700"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-3 border-l border-gray-200 pl-5">
