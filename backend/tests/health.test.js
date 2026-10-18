@@ -71,3 +71,10 @@ test("POST /api/auth/register rejects missing fields", async () => {
 
   assert.equal(response.status, 400);
 });
+
+
+test("GET /api/monitors rejects unauthenticated users", async () => {
+  const response = await request(app).get("/api/monitors");
+
+  assert.equal(response.status, 401);
+});
