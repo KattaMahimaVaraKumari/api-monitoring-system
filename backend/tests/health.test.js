@@ -47,3 +47,27 @@ test("POST with malformed JSON returns 400", async () => {
 
   assert.equal(response.status, 400);
 });
+
+
+test("POST /api/auth/register rejects an invalid email", async () => {
+  const response = await request(app)
+    .post("/api/auth/register")
+    .send({
+      name: "Test User",
+      email: "not-an-email",
+      password: "TestPassword123!",
+    });
+
+  assert.equal(response.status, 400);
+});
+
+
+test("POST /api/auth/register rejects missing fields", async () => {
+  const response = await request(app)
+    .post("/api/auth/register")
+    .send({
+      name: "Test User",
+    });
+
+  assert.equal(response.status, 400);
+});
