@@ -33,7 +33,7 @@ export const resolveIncident = async (monitorId) => {
     const resolvedAt = new Date();
 
     const duration = Math.floor(
-        (resolvedAt.getTime() - incident.startedAt.getTime()) / 1000
+        (resolvedAt.getTime() - incident.startedAt.getTime()) / 60000
     );
 
     incident.resolvedAt = resolvedAt;

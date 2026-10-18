@@ -5,8 +5,12 @@ import request from "supertest";
 import app from "../app.js";
 
 import Monitor from "../src/models/Monitor.js";
+import Incident from "../src/models/Incident.js";
 import { getMonitor } from "../src/controllers/monitorController.js";
-import { updateProfile } from "../src/controllers/authController.js";
+import bcrypt from "bcryptjs";
+import User from "../src/models/User.js";
+import { changePassword, updateProfile } from "../src/controllers/authController.js";
+import { resolveIncident } from "../src/services/incidentService.js";
 import { updateProfileSchema } from "../src/utils/validationSchemas.js";
 
 test("GET /api/health returns a healthy response", async () => {
@@ -136,6 +140,74 @@ test("updateProfile saves and returns the authenticated user's updated name", as
   });
 });
 
+test("changePassword rejects an incorrect current password without saving", async (t) => {
+  const user = {
+    password: "stored-hash",
+    async save() {
+      assert.fail("Password must not be saved when the current password is incorrect");
+    },
+  };
+  t.mock.method(User, "findById", async () => user);
+  t.mock.method(bcrypt, "compare", async () => false);
+  const res = {
+    statusCode: 200,
+    body: null,
+    status(code) {
+      this.statusCode = code;
+      return this;
+    },
+    json(data) {
+      this.body = data;
+      return this;
+    },
+  };
+
+  await changePassword(
+    { user: { _id: "507f1f77bcf86cd799439011" }, body: { currentPassword: "wrong", newPassword: "newpass123" } },
+    res
+  );
+
+  assert.equal(res.statusCode, 400);
+  assert.deepEqual(res.body, { message: "Current password is incorrect" });
+});
+
+
+test("changePassword hashes and saves the new password without returning it", async (t) => {
+  let saved = false;
+  const user = {
+    password: "stored-hash",
+    async save() {
+      saved = true;
+    },
+  };
+  t.mock.method(User, "findById", async () => user);
+  t.mock.method(bcrypt, "compare", async () => true);
+  t.mock.method(bcrypt, "hash", async () => "new-stored-hash");
+  const res = {
+    statusCode: 200,
+    body: null,
+    status(code) {
+      this.statusCode = code;
+      return this;
+    },
+    json(data) {
+      this.body = data;
+      return this;
+    },
+  };
+
+  await changePassword(
+    { user: { _id: "507f1f77bcf86cd799439011" }, body: { currentPassword: "oldpass", newPassword: "newpass123" } },
+    res
+  );
+
+  assert.equal(saved, true);
+  assert.equal(user.password, "new-stored-hash");
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body, { message: "Password changed successfully" });
+  assert.equal(JSON.stringify(res.body).includes("new-stored-hash"), false);
+});
+
 
 test("POST /api/auth/login rejects missing fields", async () => {
   const response = await request(app)
@@ -187,4 +259,25 @@ test("getMonitor returns 404 when the monitor does not exist", async (t) => {
   assert.deepEqual(res.body, {
     message: "Monitor not found",
   });
+});
+
+test("resolveIncident stores duration in whole minutes based on incident timestamps", async (t) => {
+  const incident = {
+    startedAt: new Date(Date.now() - 10 * 60 * 1000 - 30 * 1000),
+    resolvedAt: null,
+    duration: null,
+    status: "open",
+    async save() {},
+  };
+  t.mock.method(Incident, "findOne", async () => incident);
+
+  const resolvedIncident = await resolveIncident("507f1f77bcf86cd799439011");
+
+  assert.equal(resolvedIncident, incident);
+  assert.equal(incident.duration, 10);
+  assert.equal(
+    incident.duration,
+    Math.floor((incident.resolvedAt.getTime() - incident.startedAt.getTime()) / 60000)
+  );
+  assert.equal(incident.status, "resolved");
 });

@@ -7,6 +7,12 @@ const Incidents = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [currentTime, setCurrentTime] = useState(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const fetchIncidents = async (showRefreshLoader = false) => {
     try {
@@ -23,6 +29,7 @@ const Incidents = () => {
       const response = await api.get("/incidents");
 
       setIncidents(response.data.incidents || []);
+      setCurrentTime(Date.now());
     } catch (error) {
       console.error("Failed to fetch incidents:", error);
 
@@ -40,7 +47,11 @@ const Incidents = () => {
   };
 
   useEffect(() => {
-    fetchIncidents();
+    const timeout = setTimeout(() => {
+      fetchIncidents();
+    }, 0);
+
+    return () => clearTimeout(timeout);
   }, []);
 
   const getStatusStyle = (status) => {
@@ -49,6 +60,29 @@ const Incidents = () => {
     }
 
     return "bg-green-50 text-green-700";
+  };
+
+  const getIncidentDuration = (incident) => {
+    if (!incident.startedAt) {
+      return "-";
+    }
+
+    const startedAt = new Date(incident.startedAt).getTime();
+    const endedAt = incident.resolvedAt
+      ? new Date(incident.resolvedAt).getTime()
+      : incident.status === "open"
+        ? currentTime
+        : null;
+
+    if (incident.status === "open" && currentTime === null) {
+      return "Ongoing";
+    }
+
+    if (endedAt === null || !Number.isFinite(startedAt) || !Number.isFinite(endedAt)) {
+      return "-";
+    }
+
+    return `${Math.max(0, Math.floor((endedAt - startedAt) / 60000))} min`;
   };
 
   return (
@@ -219,11 +253,7 @@ const Incidents = () => {
                     </td>
 
                     <td className="px-6 py-4 text-sm text-gray-600">
-                      {incident.duration
-                        ? `${incident.duration} min`
-                        : incident.status === "open"
-                          ? "Ongoing"
-                          : "-"}
+                      {getIncidentDuration(incident)}
                     </td>
                   </tr>
                 ))}
