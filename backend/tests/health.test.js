@@ -78,3 +78,26 @@ test("GET /api/monitors rejects unauthenticated users", async () => {
 
   assert.equal(response.status, 401);
 });
+
+
+test("POST /api/auth/login rejects missing fields", async () => {
+  const response = await request(app)
+    .post("/api/auth/login")
+    .send({
+      email: "test@example.com",
+    });
+
+  assert.equal(response.status, 400);
+});
+
+
+test("POST /api/auth/login rejects an invalid email", async () => {
+  const response = await request(app)
+    .post("/api/auth/login")
+    .send({
+      email: "invalid-email",
+      password: "TestPassword123!",
+    });
+
+  assert.equal(response.status, 400);
+});
