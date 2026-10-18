@@ -4,6 +4,9 @@ import assert from "node:assert/strict";
 import request from "supertest";
 import app from "../app.js";
 
+import Monitor from "../src/models/Monitor.js";
+import { getMonitor } from "../src/controllers/monitorController.js";
+
 test("GET /api/health returns a healthy response", async () => {
   const response = await request(app).get("/api/health");
 
@@ -100,4 +103,34 @@ test("POST /api/auth/login rejects an invalid email", async () => {
     });
 
   assert.equal(response.status, 400);
+});
+
+
+test("getMonitor returns 404 when the monitor does not exist", async (t) => {
+  t.mock.method(Monitor, "findOne", async () => null);
+
+  const req = {
+    params: { id: "507f1f77bcf86cd799439011" },
+    user: { _id: "507f1f77bcf86cd799439012" },
+  };
+
+  const res = {
+    statusCode: 200,
+    body: null,
+    status(code) {
+      this.statusCode = code;
+      return this;
+    },
+    json(data) {
+      this.body = data;
+      return this;
+    },
+  };
+
+  await getMonitor(req, res);
+
+  assert.equal(res.statusCode, 404);
+  assert.deepEqual(res.body, {
+    message: "Monitor not found",
+  });
 });
