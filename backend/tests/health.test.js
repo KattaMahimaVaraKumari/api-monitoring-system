@@ -6,6 +6,8 @@ import app from "../app.js";
 
 import Monitor from "../src/models/Monitor.js";
 import { getMonitor } from "../src/controllers/monitorController.js";
+import { updateProfile } from "../src/controllers/authController.js";
+import { updateProfileSchema } from "../src/utils/validationSchemas.js";
 
 test("GET /api/health returns a healthy response", async () => {
   const response = await request(app).get("/api/health");
@@ -80,6 +82,58 @@ test("GET /api/monitors rejects unauthenticated users", async () => {
   const response = await request(app).get("/api/monitors");
 
   assert.equal(response.status, 401);
+});
+
+
+test("PUT /api/auth/profile rejects unauthenticated users", async () => {
+  const response = await request(app)
+    .put("/api/auth/profile")
+    .send({ name: "Updated Name" });
+
+  assert.equal(response.status, 401);
+});
+
+
+test("profile name validation trims whitespace and rejects empty names", () => {
+  assert.deepEqual(
+    updateProfileSchema.parse({ name: "  Updated Name  " }),
+    { name: "Updated Name" }
+  );
+  assert.equal(updateProfileSchema.safeParse({ name: "   " }).success, false);
+});
+
+
+test("updateProfile saves and returns the authenticated user's updated name", async () => {
+  const user = {
+    _id: "507f1f77bcf86cd799439011",
+    name: "Original Name",
+    email: "user@example.com",
+    role: "user",
+    async save() {},
+  };
+  let statusCode = 200;
+  let body;
+  const res = {
+    status(code) {
+      statusCode = code;
+      return this;
+    },
+    json(data) {
+      body = data;
+      return this;
+    },
+  };
+
+  await updateProfile({ user, body: { name: "Updated Name" } }, res);
+
+  assert.equal(user.name, "Updated Name");
+  assert.equal(statusCode, 200);
+  assert.deepEqual(body.user, {
+    id: user._id,
+    name: "Updated Name",
+    email: "user@example.com",
+    role: "user",
+  });
 });
 
 

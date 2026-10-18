@@ -27,6 +27,13 @@ export const loginSchema = z.object({
         .min(1,"Password is reqired"),
 });
 
+export const updateProfileSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name cannot be empty"),
+});
+
 
 export const createMonitorSchema = z.object({
   name: z
@@ -125,4 +132,3 @@ export const createApiKeySchema = z.object({
     .trim()
     .min(2,"API key name must be at least 2 characters long"),
 });
-

@@ -32,6 +32,12 @@ export const AuthProvider = ({ children }) => {
     return response.data.user;
   };
 
+  const updateProfile = async (name) => {
+    const response = await api.put("/auth/profile", { name });
+    setUser(response.data.user);
+    return response.data.user;
+  };
+
   const logout = async () => {
     try {
       await api.post("/auth/logout");
@@ -42,7 +48,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, logout }}
+      value={{ user, loading, login, logout, updateProfile }}
     >
       {children}
     </AuthContext.Provider>

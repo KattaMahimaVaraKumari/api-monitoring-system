@@ -98,6 +98,28 @@ export const getMe = async (req, res) => {
   });
 };
 
+export const updateProfile = async (req, res) => {
+    try {
+        req.user.name = req.body.name;
+        await req.user.save();
+
+        res.json({
+            message: "Profile updated successfully",
+            user: {
+                id: req.user._id,
+                name: req.user.name,
+                email: req.user.email,
+                role: req.user.role,
+            },
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error",
+            error: error.message,
+        });
+    }
+};
+
 
 export const logoutUser = (req,res) =>{
     res.clearCookie("token", {
