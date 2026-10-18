@@ -3,9 +3,9 @@ import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js"
 
 const authCookieOptions = () => ({
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
 });
 
 export const registerUser = async (req, res) => {
